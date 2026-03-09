@@ -47,7 +47,8 @@ async function reloadAll() {
     if (techs.data)    store.setTechnicians(techs.data)
     store.setProjects(projectsWithTechs)
     store.setTasks(tasksWithDetails)
-    if (statuses.data) store.setCustomStatuses(statuses.data.map((s: any) => s.valor))
+    // Solo sobreescribir si la tabla tiene datos; si está vacía, conservar los defaults del store
+    if (statuses.data && statuses.data.length > 0) store.setCustomStatuses(statuses.data.map((s: any) => s.valor))
     if (notifs.data) {
       store.setNotifications(notifs.data.map((n: any) => ({
         id: n.id, tarea_id: n.tarea_id,

@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/*
+ * Tailwind v4: configurar dark mode por clase .dark en lugar de media query.
+ * Sin esto, dark: utilities solo responden a prefers-color-scheme y no al toggle manual.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;

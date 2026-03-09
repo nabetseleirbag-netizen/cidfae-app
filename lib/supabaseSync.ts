@@ -285,18 +285,21 @@ export async function syncSendTaskNotification(taskId: string) {
 // ── Estados personalizados ────────────────────────────────────────────────
 
 export async function syncAddStatus(status: string) {
-  useStore.getState().addStatus(status)
+  const norm = status.trim().toLowerCase()
+  useStore.getState().addStatus(norm)
   const client = db()
   if (client) {
-    const norm = status.trim().toLowerCase()
-    await client.from('custom_statuses').insert({ valor: norm }).single()
+    const { error } = await client.from('custom_statuses').insert({ valor: norm })
+    if (error) console.error('syncAddStatus error:', error)
   }
 }
 
 export async function syncRemoveStatus(status: string) {
-  useStore.getState().removeStatus(status)
+  const norm = status.trim().toLowerCase()
+  useStore.getState().removeStatus(norm)
   const client = db()
   if (client) {
-    await client.from('custom_statuses').delete().eq('valor', status)
+    const { error } = await client.from('custom_statuses').delete().eq('valor', norm)
+    if (error) console.error('syncRemoveStatus error:', error)
   }
 }

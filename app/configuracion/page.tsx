@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useStore } from '@/lib/store'
+import { syncAddStatus, syncRemoveStatus } from '@/lib/supabaseSync'
 import Header from '@/components/layout/Header'
 import { Moon, Sun, Shield, Bell, Database, Download, Info, X, Plus } from 'lucide-react'
 import { cn, getProjectProgress } from '@/lib/utils'
@@ -15,15 +16,13 @@ export default function ConfiguracionPage() {
     projects,
     technicians,
     customStatuses,
-    addStatus,
-    removeStatus,
   } = useStore()
 
   const [newStatus, setNewStatus] = useState('')
 
-  const handleAddStatus = () => {
+  const handleAddStatus = async () => {
     if (newStatus.trim()) {
-      addStatus(newStatus.trim())
+      await syncAddStatus(newStatus.trim())
       setNewStatus('')
     }
   }
@@ -333,7 +332,7 @@ export default function ConfiguracionPage() {
                 </span>
                 {customStatuses.length > 1 && (
                   <button
-                    onClick={() => removeStatus(status)}
+                    onClick={() => syncRemoveStatus(status)}
                     className="text-slate-400 hover:text-red-500 transition-colors ml-1"
                     aria-label={`Eliminar estado ${status}`}
                   >
