@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useStore } from '@/lib/store'
+import { syncAddProject, syncUpdateProject, syncDeleteProject } from '@/lib/supabaseSync'
 import Header from '@/components/layout/Header'
 import { Modal } from '@/components/ui/Modal'
 import { Plus, Search, Calendar, Users, TrendingUp, Pencil, Trash2, ChevronRight } from 'lucide-react'
@@ -18,7 +19,7 @@ const EMPTY_PROJECT: Omit<Project, 'id'> = {
 }
 
 export default function ProyectosPage() {
-  const { projects, departments, technicians, tasks, addProject, updateProject, deleteProject } = useStore()
+  const { projects, departments, technicians, tasks } = useStore()
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [filterDept, setFilterDept] = useState('')
@@ -50,9 +51,9 @@ export default function ProyectosPage() {
 
   function handleSave() {
     if (editId) {
-      updateProject(editId, { ...form, tecnicos_ids: selectedTecnicos })
+      syncUpdateProject(editId, { ...form, tecnicos_ids: selectedTecnicos })
     } else {
-      addProject({ ...form, tecnicos_ids: selectedTecnicos })
+      syncAddProject({ ...form, tecnicos_ids: selectedTecnicos })
     }
     setModalOpen(false)
   }
@@ -314,7 +315,7 @@ export default function ProyectosPage() {
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">¿Estás seguro de que deseas eliminar este proyecto?</p>
         <div className="flex justify-end gap-3">
           <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Cancelar</button>
-          <button onClick={() => { deleteProject(deleteConfirm!); setDeleteConfirm(null) }} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-xl transition-colors">Eliminar</button>
+          <button onClick={() => { syncDeleteProject(deleteConfirm!); setDeleteConfirm(null) }} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-xl transition-colors">Eliminar</button>
         </div>
       </Modal>
     </div>

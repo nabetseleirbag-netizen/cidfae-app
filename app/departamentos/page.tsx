@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useStore } from '@/lib/store'
+import { syncAddDepartment, syncUpdateDepartment, syncDeleteDepartment } from '@/lib/supabaseSync'
 import Header from '@/components/layout/Header'
 import { Modal } from '@/components/ui/Modal'
 import { Department } from '@/lib/types'
@@ -13,7 +14,7 @@ const DEPT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06
 const DEPT_ICONS = ['🔧', '🛩', '💻', '⚙️', '📡', '🚁', '🔬', '🏗', '📋', '⚡', '🎯', '🛡']
 
 export default function DepartamentosPage() {
-  const { departments, technicians, projects, tasks, addDepartment, updateDepartment, deleteDepartment } = useStore()
+  const { departments, technicians, projects, tasks } = useStore()
 
   const [showDeptModal, setShowDeptModal] = useState(false)
   const [editingDept, setEditingDept] = useState<Department | null>(null)
@@ -37,16 +38,16 @@ export default function DepartamentosPage() {
     e.preventDefault()
     if (!deptForm.nombre.trim()) return
     if (editingDept) {
-      updateDepartment(editingDept.id, deptForm)
+      syncUpdateDepartment(editingDept.id, deptForm)
     } else {
-      addDepartment(deptForm)
+      syncAddDepartment(deptForm)
     }
     setShowDeptModal(false)
   }
 
   function handleDelete() {
     if (!showDeleteConfirm) return
-    deleteDepartment(showDeleteConfirm.id)
+    syncDeleteDepartment(showDeleteConfirm.id)
     setShowDeleteConfirm(null)
   }
 

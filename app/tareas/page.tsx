@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useStore } from '@/lib/store'
+import { syncAddTask, syncUpdateTask, syncDeleteTask, syncMoveTask, syncToggleChecklistItem, syncAddComment, syncSendTaskNotification } from '@/lib/supabaseSync'
 import Header from '@/components/layout/Header'
 import { Modal } from '@/components/ui/Modal'
 import { Plus, Search, CheckSquare, Square, MessageSquare, Paperclip, Pencil, Trash2, ChevronDown, Send } from 'lucide-react'
@@ -24,7 +25,7 @@ const EMPTY_TASK: Omit<Task, 'id'> = {
 type ViewMode = 'kanban' | 'lista'
 
 export default function TareasPage() {
-  const { tasks, projects, departments, technicians, addTask, updateTask, deleteTask, moveTask, toggleChecklistItem, addComment, sendTaskNotification } = useStore()
+  const { tasks, projects, departments, technicians } = useStore()
   const [search, setSearch] = useState('')
   const [filterProject, setFilterProject] = useState('')
   const [filterTech, setFilterTech] = useState('')
@@ -61,9 +62,9 @@ export default function TareasPage() {
 
   function handleSave() {
     if (editId) {
-      updateTask(editId, form)
+      syncUpdateTask(editId, form)
     } else {
-      addTask(form)
+      syncAddTask(form)
     }
     setModalOpen(false)
   }
@@ -76,14 +77,14 @@ export default function TareasPage() {
 
   function handleComment() {
     if (!newComment.trim() || !detailTask) return
-    addComment(detailTask.id, newComment)
+    syncAddComment(detailTask.id, newComment)
     setNewComment('')
     setDetailTask(tasks.find(t => t.id === detailTask.id) || detailTask)
   }
 
   function handleSendNotification() {
     if (!sendModalTaskId) return
-    sendTaskNotification(sendModalTaskId)
+    syncSendTaskNotification(sendModalTaskId)
     setSendModalTaskId(null)
   }
 
@@ -260,7 +261,7 @@ export default function TareasPage() {
                           <select
                             value={task.estado}
                             onClick={e => e.stopPropagation()}
-                            onChange={e => moveTask(task.id, e.target.value as TaskStatus)}
+                            onChange={e => syncMoveTask(task.id, e.target.value as TaskStatus)}
                             className={cn('text-xs font-medium px-2 py-0.5 rounded-full border-0 outline-none cursor-pointer', STATUS_COLORS[task.estado])}
                           >
                             {COLUMNS.map(c => <option key={c.status} value={c.status}>{STATUS_LABELS[c.status]}</option>)}
@@ -402,7 +403,7 @@ export default function TareasPage() {
               )}
               <select
                 value={detailTask.estado}
-                onChange={e => { moveTask(detailTask.id, e.target.value as TaskStatus); setDetailTask(t => t ? { ...t, estado: e.target.value as TaskStatus } : null) }}
+                onChange={e => { syncMoveTask(detailTask.id, e.target.value as TaskStatus); setDetailTask(t => t ? { ...t, estado: e.target.value as TaskStatus } : null) }}
                 className="px-3 py-1 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-full text-xs font-medium outline-none"
               >
                 {COLUMNS.map(c => <option key={c.status} value={c.status}>→ {c.label}</option>)}
@@ -440,7 +441,7 @@ export default function TareasPage() {
                     <button
                       key={item.id}
                       className="flex items-center gap-3 w-full text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 p-1.5 rounded-lg transition-colors"
-                      onClick={() => { toggleChecklistItem(detailTask.id, item.id); setDetailTask(t => t ? { ...t, checklist: t.checklist.map(c => c.id === item.id ? { ...c, completado: !c.completado } : c) } : null) }}
+                      onClick={() => { syncToggleChecklistItem(detailTask.id, item.id); setDetailTask(t => t ? { ...t, checklist: t.checklist.map(c => c.id === item.id ? { ...c, completado: !c.completado } : c) } : null) }}
                     >
                       {item.completado ? <CheckSquare size={15} className="text-blue-500 shrink-0" /> : <Square size={15} className="text-slate-300 shrink-0" />}
                       <span className={cn('text-sm', item.completado ? 'line-through text-slate-400' : 'text-slate-700 dark:text-slate-300')}>{item.texto}</span>
@@ -556,7 +557,7 @@ export default function TareasPage() {
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">¿Estás seguro de que deseas eliminar esta tarea?</p>
         <div className="flex justify-end gap-3">
           <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl">Cancelar</button>
-          <button onClick={() => { deleteTask(deleteConfirm!); setDeleteConfirm(null); setDetailTask(null) }} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-xl">Eliminar</button>
+          <button onClick={() => { syncDeleteTask(deleteConfirm!); setDeleteConfirm(null); setDetailTask(null) }} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-xl">Eliminar</button>
         </div>
       </Modal>
     </div>

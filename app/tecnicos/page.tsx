@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useStore } from '@/lib/store'
+import { syncAddTechnician, syncUpdateTechnician, syncDeleteTechnician } from '@/lib/supabaseSync'
 import Header from '@/components/layout/Header'
 import { Modal } from '@/components/ui/Modal'
 import { Plus, Search, Mail, Phone, Pencil, Trash2, UserCheck, UserX } from 'lucide-react'
@@ -24,7 +25,7 @@ const DEPT_COLORS: Record<string, string> = {
 }
 
 export default function TecnicosPage() {
-  const { technicians, departments, tasks, customStatuses, addTechnician, updateTechnician, deleteTechnician } = useStore()
+  const { technicians, departments, tasks, customStatuses } = useStore()
   const [search, setSearch] = useState('')
   const [filterDept, setFilterDept] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
@@ -54,15 +55,15 @@ export default function TecnicosPage() {
   function handleSave() {
     const iniciales = form.nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
     if (editId) {
-      updateTechnician(editId, { ...form, iniciales })
+      syncUpdateTechnician(editId, { ...form, iniciales })
     } else {
-      addTechnician({ ...form, iniciales })
+      syncAddTechnician({ ...form, iniciales })
     }
     setModalOpen(false)
   }
 
   function handleDelete(id: string) {
-    deleteTechnician(id)
+    syncDeleteTechnician(id)
     setDeleteConfirm(null)
   }
 
