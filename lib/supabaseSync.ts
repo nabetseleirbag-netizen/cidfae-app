@@ -8,7 +8,7 @@ import { supabase, isSupabaseConfigured } from './supabase'
 import { useStore } from './store'
 import type { Department, Technician, Project, Task, Notification } from './types'
 
-const uid = () => `id-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+const uid = () => crypto.randomUUID()
 const db = () => isSupabaseConfigured() ? supabase : null
 
 // ── Helpers para mapear entre Zustand types y DB columns ─────────────────
@@ -51,7 +51,8 @@ function projectToDb(project: Project) {
 
 export async function syncAddDepartment(d: Omit<Department, 'id'>) {
   const newDept: Department = { ...d, id: uid() }
-  useStore.getState().addDepartment(d)
+  const store = useStore.getState()
+  store.setDepartments([...store.departments, newDept])
   const client = db()
   if (client) {
     const { error } = await client.from('departments').insert({ ...newDept })
@@ -82,13 +83,12 @@ export async function syncDeleteDepartment(id: string) {
 
 export async function syncAddTechnician(t: Omit<Technician, 'id'>) {
   const newTech: Technician = { ...t, id: uid() }
-  useStore.getState().addTechnician(t)
+  const store = useStore.getState()
+  store.setTechnicians([...store.technicians, newTech])
   const client = db()
   if (client) {
-    const { error } = await client.from('technicians').insert({
-      ...newTech,
-      avatar: undefined,  // not in DB
-    })
+    const { avatar: _avatar, ...techRow } = newTech as any
+    const { error } = await client.from('technicians').insert(techRow)
     if (error) console.error('syncAddTechnician error:', error)
   }
   return newTech
@@ -117,7 +117,8 @@ export async function syncDeleteTechnician(id: string) {
 
 export async function syncAddProject(p: Omit<Project, 'id'>) {
   const newProj: Project = { ...p, id: uid() }
-  useStore.getState().addProject(p)
+  const store = useStore.getState()
+  store.setProjects([...store.projects, newProj])
   const client = db()
   if (client) {
     const projectRow = projectToDb(newProj)
@@ -127,9 +128,9 @@ export async function syncAddProject(p: Omit<Project, 'id'>) {
       return newProj
     }
     // Insert junction table rows
-    if (p.tecnicos_ids?.length) {
+    if (newProj.tecnicos_ids?.length) {
       await client.from('project_technicians').insert(
-        p.tecnicos_ids.map(tid => ({ project_id: newProj.id, technician_id: tid }))
+        newProj.tecnicos_ids.map(tid => ({ project_id: newProj.id, technician_id: tid }))
       )
     }
   }
@@ -171,12 +172,13 @@ export async function syncAddTask(t: Omit<Task, 'id'>) {
   const newTask: Task = {
     ...t,
     id: uid(),
-    checklist: t.checklist ?? [],
+    checklist: (t.checklist ?? []).map(c => ({ ...c, id: c.id || uid() })),
     comentarios: t.comentarios ?? [],
     adjuntos: t.adjuntos ?? [],
     tags: t.tags ?? [],
   }
-  useStore.getState().addTask(t)
+  const store = useStore.getState()
+  store.setTasks([...store.tasks, newTask])
   const client = db()
   if (client) {
     const taskRow = taskToDb(newTask)

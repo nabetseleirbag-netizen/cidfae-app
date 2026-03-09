@@ -54,7 +54,7 @@ interface AppState {
   setCustomStatuses: (statuses: string[]) => void
 }
 
-const uid = () => `id-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+const uid = () => crypto.randomUUID()
 
 export const useStore = create<AppState>((set, get) => ({
   currentUser: CURRENT_USER,
