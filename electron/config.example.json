@@ -1,0 +1,5 @@
+{
+  "_instrucciones": "Copia este archivo como 'config.json' y llena los valores de tu proyecto Supabase.",
+  "supabaseUrl": "",
+  "supabaseAnonKey": ""
+}
