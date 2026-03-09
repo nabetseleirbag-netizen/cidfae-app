@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import Sidebar from './Sidebar'
+import BottomNav from './BottomNav'
 import { cn } from '@/lib/utils'
 import DataProvider from '@/components/DataProvider'
 
@@ -20,7 +21,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     }
   }, [darkMode])
 
-  // For public routes (login), render without sidebar
+  // Rutas públicas (login): sin sidebar ni nav
   if (isPublicRoute) {
     return (
       <div className="bg-slate-50 dark:bg-slate-950 min-h-screen">
@@ -31,14 +32,24 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
+      {/* Sidebar solo visible en md+ */}
       <Sidebar />
+
+      {/* Contenido principal */}
       <main className={cn(
         'flex-1 flex flex-col overflow-hidden transition-all duration-300',
-        sidebarCollapsed ? 'ml-16' : 'ml-64'
+        // En móvil no hay margen izquierdo (sidebar oculto)
+        // En tablet/desktop sí hay margen para el sidebar
+        sidebarCollapsed ? 'md:ml-16' : 'md:ml-64',
+        // Espacio para la bottom nav en móvil (62px nav + safe area inset)
+        'pb-[calc(62px+env(safe-area-inset-bottom))] md:pb-0'
       )}>
         <DataProvider />
         {children}
       </main>
+
+      {/* Bottom navigation solo en móvil */}
+      <BottomNav />
     </div>
   )
 }

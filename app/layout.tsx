@@ -11,6 +11,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  // Necesario para safe-area-inset-* en iPhone con notch
+  viewportFit: 'cover',
 }
 
 export const metadata: Metadata = {

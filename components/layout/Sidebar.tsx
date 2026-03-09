@@ -26,7 +26,8 @@ export default function Sidebar() {
 
   return (
     <aside className={cn(
-      'fixed left-0 top-0 h-screen flex flex-col transition-all duration-300 z-40',
+      // Oculto en móvil, visible en tablet/desktop
+      'hidden md:flex fixed left-0 top-0 h-screen flex-col transition-all duration-300 z-40',
       'bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700',
       sidebarCollapsed ? 'w-16' : 'w-64'
     )}>
