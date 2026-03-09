@@ -151,29 +151,61 @@ returns text as $$
   select rol from public.profiles where id = auth.uid()
 $$ language sql security definer stable;
 
+-- ── Borrar políticas existentes para poder re-ejecutar sin errores ──
+drop policy if exists "admins_all"              on public.departments;
+drop policy if exists "admins_all"              on public.technicians;
+drop policy if exists "admins_all"              on public.projects;
+drop policy if exists "admins_all"              on public.project_technicians;
+drop policy if exists "admins_all"              on public.tasks;
+drop policy if exists "admins_all"              on public.checklist_items;
+drop policy if exists "admins_all"              on public.comments;
+drop policy if exists "admins_all"              on public.notifications;
+drop policy if exists "admins_all"              on public.custom_statuses;
+drop policy if exists "jefes_read"              on public.departments;
+drop policy if exists "jefes_read"              on public.technicians;
+drop policy if exists "jefes_read"              on public.custom_statuses;
+drop policy if exists "jefes_crud_projects"     on public.projects;
+drop policy if exists "jefes_read_projects"     on public.projects;
+drop policy if exists "jefes_read_pt"           on public.project_technicians;
+drop policy if exists "jefes_crud_pt"           on public.project_technicians;
+drop policy if exists "jefes_crud_tasks"        on public.tasks;
+drop policy if exists "jefes_crud_checklist"    on public.checklist_items;
+drop policy if exists "jefes_crud_comments"     on public.comments;
+drop policy if exists "jefes_crud_notif"        on public.notifications;
+drop policy if exists "tecnicos_own_tasks"      on public.tasks;
+drop policy if exists "tecnicos_update_own_tasks" on public.tasks;
+drop policy if exists "tecnicos_own_notif"      on public.notifications;
+drop policy if exists "tecnicos_mark_read"      on public.notifications;
+drop policy if exists "tecnicos_read_checklist" on public.checklist_items;
+drop policy if exists "tecnicos_update_checklist" on public.checklist_items;
+drop policy if exists "tecnicos_read_comments"  on public.comments;
+drop policy if exists "tecnicos_add_comments"   on public.comments;
+drop policy if exists "own_profile"             on public.profiles;
+drop policy if exists "admins_all_profiles"     on public.profiles;
+
 -- Políticas: Administrador tiene acceso total
-create policy "admins_all" on public.departments for all using (public.get_my_role() = 'administrador');
-create policy "admins_all" on public.technicians for all using (public.get_my_role() = 'administrador');
-create policy "admins_all" on public.projects for all using (public.get_my_role() = 'administrador');
+create policy "admins_all" on public.departments       for all using (public.get_my_role() = 'administrador');
+create policy "admins_all" on public.technicians       for all using (public.get_my_role() = 'administrador');
+create policy "admins_all" on public.projects          for all using (public.get_my_role() = 'administrador');
 create policy "admins_all" on public.project_technicians for all using (public.get_my_role() = 'administrador');
-create policy "admins_all" on public.tasks for all using (public.get_my_role() = 'administrador');
-create policy "admins_all" on public.checklist_items for all using (public.get_my_role() = 'administrador');
-create policy "admins_all" on public.comments for all using (public.get_my_role() = 'administrador');
-create policy "admins_all" on public.notifications for all using (public.get_my_role() = 'administrador');
-create policy "admins_all" on public.custom_statuses for all using (public.get_my_role() = 'administrador');
+create policy "admins_all" on public.tasks             for all using (public.get_my_role() = 'administrador');
+create policy "admins_all" on public.checklist_items   for all using (public.get_my_role() = 'administrador');
+create policy "admins_all" on public.comments          for all using (public.get_my_role() = 'administrador');
+create policy "admins_all" on public.notifications     for all using (public.get_my_role() = 'administrador');
+create policy "admins_all" on public.custom_statuses   for all using (public.get_my_role() = 'administrador');
 
 -- Políticas: Jefe de Proyecto — leer todo, CRUD en proyectos/tareas
-create policy "jefes_read" on public.departments for select using (public.get_my_role() in ('jefe_proyecto','tecnico'));
-create policy "jefes_read" on public.technicians for select using (public.get_my_role() in ('jefe_proyecto','tecnico'));
+create policy "jefes_read" on public.departments    for select using (public.get_my_role() in ('jefe_proyecto','tecnico'));
+create policy "jefes_read" on public.technicians    for select using (public.get_my_role() in ('jefe_proyecto','tecnico'));
 create policy "jefes_read" on public.custom_statuses for select using (public.get_my_role() in ('jefe_proyecto','tecnico'));
-create policy "jefes_crud_projects" on public.projects for all using (public.get_my_role() = 'jefe_proyecto');
-create policy "jefes_read_projects" on public.projects for select using (public.get_my_role() = 'tecnico');
-create policy "jefes_read_pt" on public.project_technicians for select using (public.get_my_role() in ('jefe_proyecto','tecnico'));
-create policy "jefes_crud_pt" on public.project_technicians for all using (public.get_my_role() = 'jefe_proyecto');
-create policy "jefes_crud_tasks" on public.tasks for all using (public.get_my_role() = 'jefe_proyecto');
-create policy "jefes_crud_checklist" on public.checklist_items for all using (public.get_my_role() = 'jefe_proyecto');
-create policy "jefes_crud_comments" on public.comments for all using (public.get_my_role() = 'jefe_proyecto');
-create policy "jefes_crud_notif" on public.notifications for all using (public.get_my_role() = 'jefe_proyecto');
+create policy "jefes_crud_projects"  on public.projects          for all    using (public.get_my_role() = 'jefe_proyecto');
+create policy "jefes_read_projects"  on public.projects          for select using (public.get_my_role() = 'tecnico');
+create policy "jefes_read_pt"        on public.project_technicians for select using (public.get_my_role() in ('jefe_proyecto','tecnico'));
+create policy "jefes_crud_pt"        on public.project_technicians for all   using (public.get_my_role() = 'jefe_proyecto');
+create policy "jefes_crud_tasks"     on public.tasks             for all    using (public.get_my_role() = 'jefe_proyecto');
+create policy "jefes_crud_checklist" on public.checklist_items   for all    using (public.get_my_role() = 'jefe_proyecto');
+create policy "jefes_crud_comments"  on public.comments          for all    using (public.get_my_role() = 'jefe_proyecto');
+create policy "jefes_crud_notif"     on public.notifications      for all    using (public.get_my_role() = 'jefe_proyecto');
 
 -- Políticas: Técnico — solo sus tareas y notificaciones
 create policy "tecnicos_own_tasks" on public.tasks for select using (
@@ -182,9 +214,9 @@ create policy "tecnicos_own_tasks" on public.tasks for select using (
 create policy "tecnicos_update_own_tasks" on public.tasks for update using (
   public.get_my_role() = 'tecnico' and tecnico_id in (select id from public.technicians where user_id = auth.uid())
 );
-create policy "tecnicos_own_notif" on public.notifications for select using (destinatario_id = auth.uid());
-create policy "tecnicos_mark_read" on public.notifications for update using (destinatario_id = auth.uid());
-create policy "tecnicos_read_checklist" on public.checklist_items for select using (
+create policy "tecnicos_own_notif"        on public.notifications for select using (destinatario_id = auth.uid());
+create policy "tecnicos_mark_read"        on public.notifications for update using (destinatario_id = auth.uid());
+create policy "tecnicos_read_checklist"   on public.checklist_items for select using (
   task_id in (select id from public.tasks where tecnico_id in (select id from public.technicians where user_id = auth.uid()))
 );
 create policy "tecnicos_update_checklist" on public.checklist_items for update using (
@@ -196,7 +228,7 @@ create policy "tecnicos_read_comments" on public.comments for select using (
 create policy "tecnicos_add_comments" on public.comments for insert with check (autor_id = auth.uid());
 
 -- Profiles: cada usuario puede ver y editar su propio perfil
-create policy "own_profile" on public.profiles for all using (id = auth.uid());
+create policy "own_profile"         on public.profiles for all using (id = auth.uid());
 create policy "admins_all_profiles" on public.profiles for all using (public.get_my_role() = 'administrador');
 
 -- ── Datos iniciales: estados de técnico ──
